@@ -14,8 +14,10 @@ include(FetchContent)
 if(NOT DEFINED slicersources_SOURCE_DIR)
   # Download Slicer sources and set variables slicersources_SOURCE_DIR and slicersources_BINARY_DIR
   FetchContent_Populate(slicersources
-    GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/Slicer/Slicer
-    GIT_TAG        5b5ae87dd2d217b8448ccd4536b8eccd81fc7423
+    # Testing the reusable build workflow of Slicer: a revision of the branch
+    # that adds it, whose superbuild can be built in stages.
+    GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/Sunderlandkyl/Slicer
+    GIT_TAG        381305648670fdf0c04364bdf8e68632e2021a70
     GIT_PROGRESS   1
     )
 else()

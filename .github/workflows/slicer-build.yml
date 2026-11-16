@@ -1,0 +1,51 @@
+name: Build installers
+
+# Builds the IDC Downloader installers on Linux, macOS and Windows with the
+# reusable workflow of Slicer, the same one that builds Slicer itself.
+#
+# The prerequisites (VTK, ITK, CTK, Python, ...) of this application are built
+# the first time, and whenever CMakeLists.txt changes, then kept on the
+# "prerequisites" release of this repository and reused by every other run.
+#
+# Testing branch: the workflow comes from a fork of Slicer, and so does the
+# Slicer revision pinned in CMakeLists.txt.
+
+on:
+  push:
+    branches:
+      - "ci/**"
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Platforms to build (comma separated: linux,macos,windows)"
+        default: "linux,macos,windows"
+      rebuild-prerequisites:
+        description: "Force a rebuild of the prerequisites"
+        type: boolean
+        default: false
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    uses: Sunderlandkyl/Slicer/.github/workflows/build-application.yml@ci/github-actions-build
+    permissions:
+      # The prerequisites are stored on a release of this repository.
+      contents: write
+    with:
+      name: IDCDownloader
+      platforms: ${{ inputs.platforms || 'linux,macos,windows' }}
+      # The same ref as on the `uses:` line.
+      ci-repository: Sunderlandkyl/Slicer
+      ci-ref: ci/github-actions-build
+      rebuild-prerequisites: ${{ inputs.rebuild-prerequisites || false }}
+      # The application builds no tests of its own, and Slicer's are not
+      # meant to pass with the modules it leaves out.
+      run-tests: false
+      extra-cmake-options: "-DBUILD_TESTING:BOOL=OFF"
